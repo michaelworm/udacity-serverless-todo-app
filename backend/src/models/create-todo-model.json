@@ -5,7 +5,10 @@
     "properties": {
         "name": {
             "type": "string"
+        },
+        "dueDate": {
+            "type": "string"
         }
     },
-    "required": ["name"]
+    "required": ["name", "dueDate"]
 }
