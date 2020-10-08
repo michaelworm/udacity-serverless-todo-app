@@ -15,7 +15,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_BY_USER_INDEX: TodosByUserIndex
-    ATTACHMENTS_S3_BUCKET: todos-attachments-buck-${self:provider.stage}
+    ATTACHMENTS_S3_BUCKET: todos-attachment-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_JWKS_URL: https://dev-tr29yf2q.eu.auth0.com/.well-known/jwks.json
 
@@ -64,6 +64,9 @@ functions:
           path: todos
           cors: true
           auth: Auth
+          request:
+            schema:
+              application/json: ${file(src/models/create-todo-model.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
