@@ -4,6 +4,8 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 
 provider:
   name: aws
@@ -22,6 +24,21 @@ provider:
   tracing:
     lambda: true
     apiGateway: true
+
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Serverless todos app
+        description: Serverless todo app
+    models:
+      - name: CreateTodo
+        contentType: application/json
+        schema: ${file(src/models/create-todo-model.json)}
+      - name: UpdateTodo
+        contentType: application/json
+        schema: ${file(src/models/update-todo-model.json)}
 
 functions:
 
@@ -64,9 +81,12 @@ functions:
           path: todos
           cors: true
           auth: Auth
-          request:
-            schema:
-              application/json: ${file(src/models/create-todo-model.json)}
+          reqValidatorName: RequestValidator
+          documentation:
+            summary: add new todo
+            description: add new todo
+            requestModels:
+              'application/json': CreateTodo
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -95,6 +115,12 @@ functions:
           path: todos/{todoId}
           cors: true
           auth: Auth
+          reqValidatorName: RequestValidator
+          documentation:
+            summary: update todo
+            description: update todo
+            requestModels:
+              'application/json': UpdateTodo
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -180,6 +206,15 @@ functions:
 
 resources:
   Resources:
+    RequestValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+
     # API Gateway
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
